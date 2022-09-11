@@ -1,73 +1,37 @@
-# Obsidian Sample Plugin
+# obsidian-system-theme
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+On Linux, Obsidian's "Adapt to system" theme setting requires that Obsidian be restarted to pick up changes to the system theme.
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+This plugin uses Electron's [nativeTheme api](https://www.electronjs.org/docs/latest/api/native-theme) to workaround this limitation. When enabled, changing the system theme between light/dark should automatically be applied to Obsidian.
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
-
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
-
-## First time developing plugins?
-
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+This code is more-or-less the exact same as [kepano's obsidian-system-dark-mode](https://github.com/kepano/obsidian-system-dark-mode) just with the underlying theme API changed.
 
 
-## API Documentation
+### NOTE:
+This plugin is currently sort of broken. On unload there's this error:
+```
+Plugin failure: obsidian-system-theme TypeError: Cannot read properties of undefined (reading 'offref')
+```
+so doing a full unload requires restarting obsidian. However it works fine when loaded, so I'm not going to spend any time trying to fix this atm. Its probably something to due with using remote: `require('electron').remote;`
 
-See https://github.com/obsidianmd/obsidian-api
+Tested on Ubuntu 20.04
+
+GNOME Shell 3.36.9
+
+----
+
+Additional context:
+
+Obsidian forum user [ecchina_ko](https://forum.obsidian.md/u/ecchina_ko) found the theme issue with Obsidian is due to a bug with Chromium:
+```
+I did some research, and I think I now know where the problem lies.
+
+The Bug
+
+While I obviously don’t have the original source code for Obsidian, I played with the development tools and the transpiled JavaScript code, and it would seem that Obsidian indeed uses the same method as the System Dark Mode plugin; specifically, it calls window.matchMedia() to get a MediaQueryList, to which it attaches an event listener for the prefers-color-scheme media feature, with a callback to a function that sets the theme depending on if the value is dark or not. Now, this would normally be all fine and dandy, except that the prefers-color-scheme feature has been broken on Chromium on Linux since 2019 1, specifically in the way that it does not react to the selected GTK theme – which is what GNOME and Fedora (among other Linux distributions and desktop environments) use. Since Obsidian is dependent on Electron, and Electron is dependent on Chromium, the bug also affects Obsidian.
+
+The Fix
+
+But wait – how does VS Code, which is also written in TypeScript and Electron, get around this on Linux? Their theme service uses Electron’s nativeTheme module 1, which provides an API to read and react to the system’s theme changes. It presents a general interface while performing the actual system-specific theme logic under the hood so that Electron users don’t have to do all the OS-specific handling themselves. Because of the previously mentioned Chromium bug, Electron developers have implemented a workaround for GTK themes for the module. The workaround seems like a good solution for now since Chromium developers don’t seem to be in any hurry to resolve the issue on their side.
+```
+Full thread: https://forum.obsidian.md/t/color-scheme-adapt-to-system-not-working-on-linux-fedora-gnome/38743/13
