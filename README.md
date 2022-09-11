@@ -25,18 +25,10 @@ npm run build
 ```
 Then restart obsidian and enable the plugin.
 
-#### NOTE:
-This plugin is currently sort of broken. On unload there's this error:
-```
-Plugin failure: obsidian-system-theme TypeError: Cannot read properties of undefined (reading 'offref')
-```
-so doing a full unload requires restarting obsidian. However it works fine when loaded, so I'm not going to spend any time trying to fix this atm. Its probably something to due with using remote: `require('electron').remote;`
+Tested on:
 
-Because of this I won't submit it to the official community plugins for now.
-
-Tested on Ubuntu 20.04
-
-GNOME Shell 3.36.9
+- Ubuntu 20.04, GNOME Shell 3.36.9
+- Arch Linux (linux 5.18.18-xanmod1-1), Sway 1.7
 
 ----
 
