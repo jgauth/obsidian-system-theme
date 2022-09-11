@@ -7,12 +7,32 @@ This plugin uses Electron's [nativeTheme api](https://www.electronjs.org/docs/la
 This code is more-or-less the exact same as [kepano's obsidian-system-dark-mode](https://github.com/kepano/obsidian-system-dark-mode) just with the underlying theme API changed.
 
 
-### NOTE:
+#### Installation:
+requires npm
+
+```
+# 1. cd to plugins directory
+cd my-vault/.obsidian/plugins
+
+# 2. clone repo
+git clone git@github.com:jgauth/obsidian-system-theme.git && cd obsidian-system-theme
+
+# 3. install deps
+npm install
+
+# 4. build
+npm run build
+```
+Then restart obsidian and enable the plugin.
+
+#### NOTE:
 This plugin is currently sort of broken. On unload there's this error:
 ```
 Plugin failure: obsidian-system-theme TypeError: Cannot read properties of undefined (reading 'offref')
 ```
 so doing a full unload requires restarting obsidian. However it works fine when loaded, so I'm not going to spend any time trying to fix this atm. Its probably something to due with using remote: `require('electron').remote;`
+
+Because of this I won't submit it to the official community plugins for now.
 
 Tested on Ubuntu 20.04
 
@@ -20,7 +40,7 @@ GNOME Shell 3.36.9
 
 ----
 
-Additional context:
+#### Additional context:
 
 Obsidian forum user [ecchina_ko](https://forum.obsidian.md/u/ecchina_ko) found the theme issue with Obsidian is due to a bug with Chromium:
 ```
