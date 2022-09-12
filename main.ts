@@ -6,7 +6,7 @@ export default class SystemThemePlugin extends Plugin {
 
 	async onload() {
 
-		let callback = () => {
+		const callback = () => {
 
 			if (nativeTheme.shouldUseDarkColors) {
 				// console.log('Dark mode active');
@@ -17,8 +17,8 @@ export default class SystemThemePlugin extends Plugin {
 			}
 		}
 
-		// Obsidian should automatically unregister this event on unload
-		this.registerEvent(nativeTheme.on('updated', callback));
+		const eventRef = nativeTheme.on('updated', callback);
+		this.register(() => nativeTheme.off('updated', callback));
 
 		callback();
 
