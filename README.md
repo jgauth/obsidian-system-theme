@@ -1,3 +1,6 @@
+# Deprecated
+As of obsidian v1.0.1 this is fixed https://forum.obsidian.md/t/obsidian-release-v1-0-1-insider-build/45735
+
 # obsidian-system-theme
 
 On Linux, Obsidian's "Adapt to system" theme setting requires that Obsidian be restarted to pick up changes to the system theme.
